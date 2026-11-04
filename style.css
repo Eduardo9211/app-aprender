@@ -1,0 +1,58 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f3f6fb;
+  margin: 0;
+  padding: 16px;
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.tarjeta {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.codigo {
+  background: #1e1e2e;
+  color: #a6e3a1;
+  font-family: monospace;
+  font-size: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  white-space: pre;
+  margin-bottom: 12px;
+}
+
+#opciones button, #btn-siguiente {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 10px;
+  font-size: 20px;
+  border: none;
+  border-radius: 12px;
+  background: #4f8cff;
+  color: white;
+}
+
+#feedback {
+  padding: 12px;
+  border-radius: 12px;
+  margin: 12px 0;
+  font-size: 18px;
+}
+#feedback.bien { background: #d4f7d4; }
+#feedback.mal  { background: #ffd9d9; }
+[hidden] {
+  display: none !important;
+}
+
+#feedback:empty {
+  display: none;
+}
