@@ -4,21 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Aprende a Programar</title>
-    <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#4f8cff">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main id="app">
-    <h1>🐍 Python desde cero</h1>
-    <p id="progreso"></p>
-    <div id="explicacion" class="tarjeta"></div>
-    <div id="codigo" class="codigo"></div>
-    <div id="respuesta" class="respuesta"></div>
-    <div id="opciones"></div>
-    <div id="feedback"></div>
-    <button id="btn-comprobar" hidden>Comprobar ✔</button>
-    <button id="btn-siguiente" hidden>Siguiente ➜</button>
+
+    <section id="pantalla-inicio">
+      <h1>👋 ¿Qué quieres aprender?</h1>
+      <div id="lista-modulos"></div>
+    </section>
+
+    <section id="pantalla-lecciones" hidden>
+      <button id="btn-volver-inicio" class="volver">⬅ Inicio</button>
+      <h1 id="titulo-modulo"></h1>
+      <div id="lista-lecciones"></div>
+    </section>
+
+    <section id="pantalla-reto" hidden>
+      <button id="btn-salir" class="volver">⬅ Salir de la lección</button>
+      <p id="progreso"></p>
+      <div id="barra"><div id="barra-llena"></div></div>
+      <div id="explicacion" class="tarjeta"></div>
+      <div id="codigo" class="codigo"></div>
+      <div id="respuesta" class="respuesta"></div>
+      <div id="opciones"></div>
+      <div id="feedback"></div>
+      <button id="btn-comprobar" hidden>Comprobar ✔</button>
+      <button id="btn-siguiente" hidden>Siguiente ➜</button>
+    </section>
+
   </main>
 
   <script src="lessons.js"></script>

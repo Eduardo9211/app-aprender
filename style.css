@@ -108,3 +108,54 @@ body {
   background: #2eb872;
   color: white;
 }
+
+.volver {
+  background: none;
+  border: none;
+  color: #4f8cff;
+  font-size: 18px;
+  padding: 8px 0;
+  margin-bottom: 8px;
+}
+
+.item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+.item small {
+  display: block;
+  color: #6a7a99;
+  font-size: 15px;
+  margin-top: 4px;
+}
+
+.item:disabled {
+  opacity: 0.5;
+}
+
+.item.hecha {
+  border-left: 8px solid #2eb872;
+}
+
+#barra {
+  height: 12px;
+  background: #dde4f2;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+#barra-llena {
+  height: 100%;
+  width: 0;
+  background: #2eb872;
+  transition: width 0.3s;
+}

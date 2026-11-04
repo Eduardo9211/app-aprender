@@ -1,3 +1,6 @@
+let moduloActual = null;
+let leccionActual = null;
+let ejerciciosActuales = [];
 let actual = 0;
 let elegidos = [];
 let orden = [];
@@ -6,18 +9,114 @@ function el(id) {
   return document.getElementById(id);
 }
 
+function leerProgreso() {
+  try {
+    return JSON.parse(localStorage.getItem("progreso")) || {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function guardarProgreso(progreso) {
+  localStorage.setItem("progreso", JSON.stringify(progreso));
+}
+
+function mostrarPantalla(nombre) {
+  el("pantalla-inicio").hidden = nombre !== "inicio";
+  el("pantalla-lecciones").hidden = nombre !== "lecciones";
+  el("pantalla-reto").hidden = nombre !== "reto";
+}
+
+function pantallaInicio() {
+  const progreso = leerProgreso();
+  el("lista-modulos").innerHTML = "";
+
+  modulos.forEach(function (modulo) {
+    const hechas = modulo.lecciones.filter(function (leccion) {
+      return progreso[leccion.id] === true;
+    }).length;
+
+    let detalle = "🔒 Próximamente";
+    if (modulo.disponible) {
+      detalle = hechas + " de " + modulo.lecciones.length + " lecciones";
+    }
+
+    const boton = document.createElement("button");
+    boton.className = "item";
+    boton.disabled = !modulo.disponible;
+    boton.innerHTML = modulo.icono + " " + modulo.nombre + "<small>" + detalle + "</small>";
+    boton.addEventListener("click", function () {
+      pantallaLecciones(modulo);
+    });
+    el("lista-modulos").appendChild(boton);
+  });
+
+  mostrarPantalla("inicio");
+}
+
+function pantallaLecciones(modulo) {
+  moduloActual = modulo;
+  const progreso = leerProgreso();
+  el("titulo-modulo").textContent = modulo.icono + " " + modulo.nombre;
+  el("lista-lecciones").innerHTML = "";
+
+  modulo.lecciones.forEach(function (leccion, i) {
+    const hecha = progreso[leccion.id] === true;
+    let anteriorHecha = true;
+    if (i > 0) {
+      anteriorHecha = progreso[modulo.lecciones[i - 1].id] === true;
+    }
+
+    let detalle = "🔒 Termina la anterior";
+    if (hecha) {
+      detalle = "✅ Terminada. Toca para repasar";
+    } else if (anteriorHecha) {
+      detalle = leccion.ejercicios.length + " retos";
+    }
+
+    const boton = document.createElement("button");
+    boton.className = "item";
+    if (hecha) {
+      boton.className = "item hecha";
+    }
+    boton.disabled = !anteriorHecha;
+    boton.innerHTML = (i + 1) + ". " + leccion.titulo + "<small>" + detalle + "</small>";
+    boton.addEventListener("click", function () {
+      empezarLeccion(leccion);
+    });
+    el("lista-lecciones").appendChild(boton);
+  });
+
+  mostrarPantalla("lecciones");
+}
+
+function empezarLeccion(leccion) {
+  leccionActual = leccion;
+  ejerciciosActuales = leccion.ejercicios;
+  actual = 0;
+  mostrarPantalla("reto");
+  mostrarEjercicio();
+}
+
 function mostrarEjercicio() {
-  const ej = ejercicios[actual];
+  const ej = ejerciciosActuales[actual];
   elegidos = [];
 
-  el("progreso").textContent = "Reto " + (actual + 1) + " de " + ejercicios.length;
+  el("progreso").textContent = "Reto " + (actual + 1) + " de " + ejerciciosActuales.length;
+  el("barra-llena").style.width = (actual / ejerciciosActuales.length * 100) + "%";
   el("explicacion").textContent = ej.explicacion;
   el("feedback").textContent = "";
   el("feedback").className = "";
-  el("btn-siguiente").hidden = true;
   el("btn-comprobar").hidden = true;
+  el("btn-siguiente").hidden = true;
   el("opciones").innerHTML = "";
   el("respuesta").innerHTML = "";
+
+  if (actual === ejerciciosActuales.length - 1) {
+    el("btn-siguiente").textContent = "Terminar lección 🎉";
+  } else {
+    el("btn-siguiente").textContent = "Siguiente ➜";
+  }
 
   if (ej.tipo === "ordenar") {
     el("codigo").textContent = "";
@@ -42,7 +141,7 @@ function mostrarOpciones(ej) {
 }
 
 function responder(i) {
-  const ej = ejercicios[actual];
+  const ej = ejerciciosActuales[actual];
   const caja = el("feedback");
 
   if (i === ej.correcta) {
@@ -107,7 +206,7 @@ function quitarBloque(i, ej) {
 }
 
 el("btn-comprobar").addEventListener("click", function () {
-  const ej = ejercicios[actual];
+  const ej = ejerciciosActuales[actual];
   const caja = el("feedback");
   let primerError = -1;
 
@@ -130,22 +229,26 @@ el("btn-comprobar").addEventListener("click", function () {
 });
 
 el("btn-siguiente").addEventListener("click", function () {
-  actual = actual + 1;
-  if (actual < ejercicios.length) {
-    mostrarEjercicio();
+  if (actual === ejerciciosActuales.length - 1) {
+    const progreso = leerProgreso();
+    progreso[leccionActual.id] = true;
+    guardarProgreso(progreso);
+    pantallaLecciones(moduloActual);
   } else {
-    el("explicacion").textContent = "🎉 ¡Terminaste este bloque! Muy bien.";
-    el("codigo").textContent = "";
-    el("respuesta").hidden = true;
-    el("opciones").innerHTML = "";
-    el("feedback").textContent = "";
-    el("progreso").textContent = "";
-    el("btn-siguiente").hidden = true;
-    el("btn-comprobar").hidden = true;
+    actual = actual + 1;
+    mostrarEjercicio();
   }
 });
 
-mostrarEjercicio();
+el("btn-salir").addEventListener("click", function () {
+  pantallaLecciones(moduloActual);
+});
+
+el("btn-volver-inicio").addEventListener("click", function () {
+  pantallaInicio();
+});
+
+pantallaInicio();
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");

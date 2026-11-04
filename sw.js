@@ -1,4 +1,4 @@
-const NOMBRE_CACHE = "aprende-v2";
+const NOMBRE_CACHE = "aprende-v3";
 
 const ARCHIVOS = [
   "./",
