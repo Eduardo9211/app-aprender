@@ -56,3 +56,55 @@ body {
 #feedback:empty {
   display: none;
 }
+
+.respuesta {
+  min-height: 60px;
+  border: 3px dashed #b8c4dc;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+.respuesta:empty::before {
+  content: "Toca los bloques de abajo para armar el código aquí";
+  color: #8090b0;
+  font-size: 16px;
+}
+
+.codigo:empty {
+  display: none;
+}
+
+#opciones .bloque, #respuesta .bloque {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: monospace;
+  font-size: 18px;
+  padding: 14px;
+  margin-bottom: 8px;
+  border: none;
+  border-radius: 10px;
+}
+
+#opciones .bloque {
+  background: #4f8cff;
+  color: white;
+}
+
+#respuesta .bloque {
+  background: #1e1e2e;
+  color: #a6e3a1;
+}
+
+#btn-comprobar {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 10px;
+  font-size: 20px;
+  border: none;
+  border-radius: 12px;
+  background: #2eb872;
+  color: white;
+}
