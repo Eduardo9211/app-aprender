@@ -159,3 +159,7 @@ body {
   background: #2eb872;
   transition: width 0.3s;
 }
+
+#opciones .bloque, #respuesta .bloque {
+  white-space: pre-wrap;
+}
