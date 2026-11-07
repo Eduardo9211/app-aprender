@@ -1,6 +1,8 @@
 let moduloActual = null;
 let leccionActual = null;
 let ejerciciosActuales = [];
+let clavesActuales = [];
+let modoRepaso = false;
 let actual = 0;
 let elegidos = [];
 let orden = [];
@@ -21,6 +23,52 @@ function guardarProgreso(progreso) {
   localStorage.setItem("progreso", JSON.stringify(progreso));
 }
 
+function leerFallos() {
+  try {
+    return JSON.parse(localStorage.getItem("fallos")) || [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function guardarFallos(lista) {
+  localStorage.setItem("fallos", JSON.stringify(lista));
+}
+
+function anotarFallo(clave) {
+  const fallos = leerFallos();
+  if (!fallos.includes(clave)) {
+    fallos.push(clave);
+    guardarFallos(fallos);
+  }
+}
+
+function quitarFallo(clave) {
+  const fallos = leerFallos().filter(function (c) {
+    return c !== clave;
+  });
+  guardarFallos(fallos);
+}
+
+function buscarEjercicio(clave) {
+  const partes = clave.split(":");
+  let encontrado = null;
+  modulos.forEach(function (modulo) {
+    modulo.lecciones.forEach(function (leccion) {
+      if (leccion.id === partes[0] && leccion.ejercicios[Number(partes[1])]) {
+        encontrado = leccion.ejercicios[Number(partes[1])];
+      }
+    });
+  });
+  return encontrado;
+}
+
+function fallosValidos() {
+  return leerFallos().filter(function (clave) {
+    return buscarEjercicio(clave) !== null;
+  });
+}
+
 function mostrarPantalla(nombre) {
   el("pantalla-inicio").hidden = nombre !== "inicio";
   el("pantalla-lecciones").hidden = nombre !== "lecciones";
@@ -28,6 +76,7 @@ function mostrarPantalla(nombre) {
 }
 
 function pantallaInicio() {
+  modoRepaso = false;
   const progreso = leerProgreso();
   el("lista-modulos").innerHTML = "";
 
@@ -50,6 +99,14 @@ function pantallaInicio() {
     });
     el("lista-modulos").appendChild(boton);
   });
+
+  const pendientes = fallosValidos().length;
+  if (pendientes > 0) {
+    el("btn-repaso").innerHTML = "🔁 Repasar mis errores<small>" + pendientes + " retos pendientes</small>";
+    el("btn-repaso").hidden = false;
+  } else {
+    el("btn-repaso").hidden = true;
+  }
 
   mostrarPantalla("inicio");
 }
@@ -91,8 +148,27 @@ function pantallaLecciones(modulo) {
 }
 
 function empezarLeccion(leccion) {
+  modoRepaso = false;
   leccionActual = leccion;
   ejerciciosActuales = leccion.ejercicios;
+  clavesActuales = leccion.ejercicios.map(function (ejercicio, i) {
+    return leccion.id + ":" + i;
+  });
+  actual = 0;
+  mostrarPantalla("reto");
+  mostrarEjercicio();
+}
+
+function empezarRepaso() {
+  const claves = fallosValidos().slice(0, 8);
+  if (claves.length === 0) {
+    pantallaInicio();
+    return;
+  }
+  modoRepaso = true;
+  leccionActual = null;
+  clavesActuales = claves;
+  ejerciciosActuales = claves.map(buscarEjercicio);
   actual = 0;
   mostrarPantalla("reto");
   mostrarEjercicio();
@@ -102,7 +178,11 @@ function mostrarEjercicio() {
   const ej = ejerciciosActuales[actual];
   elegidos = [];
 
-  el("progreso").textContent = "Reto " + (actual + 1) + " de " + ejerciciosActuales.length;
+  let prefijo = "Reto ";
+  if (modoRepaso) {
+    prefijo = "Repaso: reto ";
+  }
+  el("progreso").textContent = prefijo + (actual + 1) + " de " + ejerciciosActuales.length;
   el("barra-llena").style.width = (actual / ejerciciosActuales.length * 100) + "%";
   el("explicacion").textContent = ej.explicacion;
   el("feedback").textContent = "";
@@ -113,7 +193,11 @@ function mostrarEjercicio() {
   el("respuesta").innerHTML = "";
 
   if (actual === ejerciciosActuales.length - 1) {
-    el("btn-siguiente").textContent = "Terminar lección 🎉";
+    if (modoRepaso) {
+      el("btn-siguiente").textContent = "Terminar repaso 🎉";
+    } else {
+      el("btn-siguiente").textContent = "Terminar lección 🎉";
+    }
   } else {
     el("btn-siguiente").textContent = "Siguiente ➜";
   }
@@ -142,15 +226,20 @@ function mostrarOpciones(ej) {
 
 function responder(i) {
   const ej = ejerciciosActuales[actual];
+  const clave = clavesActuales[actual];
   const caja = el("feedback");
 
   if (i === ej.correcta) {
     caja.className = "bien";
     caja.textContent = "✅ " + ej.feedback[i];
     el("btn-siguiente").hidden = false;
+    if (modoRepaso) {
+      quitarFallo(clave);
+    }
   } else {
     caja.className = "mal";
     caja.textContent = "❌ " + ej.feedback[i];
+    anotarFallo(clave);
   }
 }
 
@@ -207,6 +296,7 @@ function quitarBloque(i, ej) {
 
 el("btn-comprobar").addEventListener("click", function () {
   const ej = ejerciciosActuales[actual];
+  const clave = clavesActuales[actual];
   const caja = el("feedback");
   let primerError = -1;
 
@@ -222,18 +312,26 @@ el("btn-comprobar").addEventListener("click", function () {
     caja.textContent = "✅ " + ej.feedbackBien;
     el("btn-comprobar").hidden = true;
     el("btn-siguiente").hidden = false;
+    if (modoRepaso) {
+      quitarFallo(clave);
+    }
   } else {
     caja.className = "mal";
     caja.textContent = "❌ El bloque del lugar " + (primerError + 1) + " no va ahí. " + ej.pista;
+    anotarFallo(clave);
   }
 });
 
 el("btn-siguiente").addEventListener("click", function () {
   if (actual === ejerciciosActuales.length - 1) {
-    const progreso = leerProgreso();
-    progreso[leccionActual.id] = true;
-    guardarProgreso(progreso);
-    pantallaLecciones(moduloActual);
+    if (modoRepaso) {
+      pantallaInicio();
+    } else {
+      const progreso = leerProgreso();
+      progreso[leccionActual.id] = true;
+      guardarProgreso(progreso);
+      pantallaLecciones(moduloActual);
+    }
   } else {
     actual = actual + 1;
     mostrarEjercicio();
@@ -241,11 +339,19 @@ el("btn-siguiente").addEventListener("click", function () {
 });
 
 el("btn-salir").addEventListener("click", function () {
-  pantallaLecciones(moduloActual);
+  if (modoRepaso) {
+    pantallaInicio();
+  } else {
+    pantallaLecciones(moduloActual);
+  }
 });
 
 el("btn-volver-inicio").addEventListener("click", function () {
   pantallaInicio();
+});
+
+el("btn-repaso").addEventListener("click", function () {
+  empezarRepaso();
 });
 
 pantallaInicio();
