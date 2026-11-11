@@ -163,3 +163,39 @@ body {
 #opciones .bloque, #respuesta .bloque {
   white-space: pre-wrap;
 }
+
+#tabla {
+  overflow-x: auto;
+  margin-bottom: 12px;
+}
+
+#tabla:empty {
+  display: none;
+}
+
+.tabla-nombre {
+  margin: 0 0 6px 0;
+  font-weight: bold;
+  color: #3a4a6b;
+}
+
+#tabla table {
+  border-collapse: collapse;
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 17px;
+}
+
+#tabla th {
+  background: #4f8cff;
+  color: white;
+  text-align: left;
+  padding: 10px;
+}
+
+#tabla td {
+  padding: 10px;
+  border-top: 1px solid #e3e9f5;
+}

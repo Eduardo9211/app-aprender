@@ -174,6 +174,42 @@ function empezarRepaso() {
   mostrarEjercicio();
 }
 
+function dibujarTabla(ej) {
+  const caja = el("tabla");
+  caja.innerHTML = "";
+
+  if (!ej.tabla) {
+    return;
+  }
+
+  const titulo = document.createElement("p");
+  titulo.className = "tabla-nombre";
+  titulo.textContent = "📋 Tabla: " + ej.tabla.nombre;
+
+  const tabla = document.createElement("table");
+
+  const encabezado = document.createElement("tr");
+  ej.tabla.columnas.forEach(function (columna) {
+    const th = document.createElement("th");
+    th.textContent = columna;
+    encabezado.appendChild(th);
+  });
+  tabla.appendChild(encabezado);
+
+  ej.tabla.filas.forEach(function (fila) {
+    const tr = document.createElement("tr");
+    fila.forEach(function (dato) {
+      const td = document.createElement("td");
+      td.textContent = dato;
+      tr.appendChild(td);
+    });
+    tabla.appendChild(tr);
+  });
+
+  caja.appendChild(titulo);
+  caja.appendChild(tabla);
+}
+
 function mostrarEjercicio() {
   const ej = ejerciciosActuales[actual];
   elegidos = [];
@@ -185,6 +221,7 @@ function mostrarEjercicio() {
   el("progreso").textContent = prefijo + (actual + 1) + " de " + ejerciciosActuales.length;
   el("barra-llena").style.width = (actual / ejerciciosActuales.length * 100) + "%";
   el("explicacion").textContent = ej.explicacion;
+  dibujarTabla(ej);
   el("feedback").textContent = "";
   el("feedback").className = "";
   el("btn-comprobar").hidden = true;

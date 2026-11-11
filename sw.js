@@ -1,4 +1,4 @@
-const NOMBRE_CACHE = "aprende-v10";
+const NOMBRE_CACHE = "aprende-v11";
 
 const ARCHIVOS = [
   "./",
@@ -16,6 +16,8 @@ const ARCHIVOS = [
   "./py-9.js",
   "./py-10.js",
   "./py-11.js",
+  "./sql-1.js",
+  "./sql-2.js",
   "./app.js",
   "./manifest.json",
   "./icon-192.png",

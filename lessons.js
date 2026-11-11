@@ -17,7 +17,7 @@ const modulos = [
     id: "sql",
     nombre: "SQL",
     icono: "🗄️",
-    disponible: false,
+    disponible: true,
     lecciones: []
   }
 ];
