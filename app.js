@@ -178,36 +178,41 @@ function dibujarTabla(ej) {
   const caja = el("tabla");
   caja.innerHTML = "";
 
-  if (!ej.tabla) {
-    return;
+  let lista = [];
+  if (ej.tablas) {
+    lista = ej.tablas;
+  } else if (ej.tabla) {
+    lista = [ej.tabla];
   }
 
-  const titulo = document.createElement("p");
-  titulo.className = "tabla-nombre";
-  titulo.textContent = "📋 Tabla: " + ej.tabla.nombre;
+  lista.forEach(function (datos) {
+    const titulo = document.createElement("p");
+    titulo.className = "tabla-nombre";
+    titulo.textContent = "📋 Tabla: " + datos.nombre;
 
-  const tabla = document.createElement("table");
+    const tabla = document.createElement("table");
 
-  const encabezado = document.createElement("tr");
-  ej.tabla.columnas.forEach(function (columna) {
-    const th = document.createElement("th");
-    th.textContent = columna;
-    encabezado.appendChild(th);
-  });
-  tabla.appendChild(encabezado);
-
-  ej.tabla.filas.forEach(function (fila) {
-    const tr = document.createElement("tr");
-    fila.forEach(function (dato) {
-      const td = document.createElement("td");
-      td.textContent = dato;
-      tr.appendChild(td);
+    const encabezado = document.createElement("tr");
+    datos.columnas.forEach(function (columna) {
+      const th = document.createElement("th");
+      th.textContent = columna;
+      encabezado.appendChild(th);
     });
-    tabla.appendChild(tr);
-  });
+    tabla.appendChild(encabezado);
 
-  caja.appendChild(titulo);
-  caja.appendChild(tabla);
+    datos.filas.forEach(function (fila) {
+      const tr = document.createElement("tr");
+      fila.forEach(function (dato) {
+        const td = document.createElement("td");
+        td.textContent = dato;
+        tr.appendChild(td);
+      });
+      tabla.appendChild(tr);
+    });
+
+    caja.appendChild(titulo);
+    caja.appendChild(tabla);
+  });
 }
 
 function mostrarEjercicio() {

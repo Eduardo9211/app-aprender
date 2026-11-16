@@ -10,7 +10,7 @@ const modulos = [
     id: "java",
     nombre: "Java",
     icono: "☕",
-    disponible: false,
+    disponible: true,
     lecciones: []
   },
   {
