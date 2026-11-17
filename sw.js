@@ -1,4 +1,4 @@
-const NOMBRE_CACHE = "aprende-v13";
+const NOMBRE_CACHE = "aprende-v14";
 
 const ARCHIVOS = [
   "./",
@@ -33,9 +33,14 @@ const ARCHIVOS = [
 ];
 
 self.addEventListener("install", function (evento) {
+  self.skipWaiting();
   evento.waitUntil(
     caches.open(NOMBRE_CACHE).then(function (cache) {
-      return cache.addAll(ARCHIVOS);
+      return cache.addAll(
+        ARCHIVOS.map(function (archivo) {
+          return new Request(archivo, { cache: "reload" });
+        })
+      );
     })
   );
 });
@@ -48,14 +53,29 @@ self.addEventListener("activate", function (evento) {
           .filter(function (n) { return n !== NOMBRE_CACHE; })
           .map(function (n) { return caches.delete(n); })
       );
+    }).then(function () {
+      return self.clients.claim();
     })
   );
 });
 
 self.addEventListener("fetch", function (evento) {
+  if (evento.request.method !== "GET") {
+    return;
+  }
   evento.respondWith(
-    caches.match(evento.request).then(function (guardado) {
-      return guardado || fetch(evento.request);
-    })
+    fetch(evento.request, { cache: "no-cache" })
+      .then(function (respuesta) {
+        if (respuesta.ok) {
+          const copia = respuesta.clone();
+          caches.open(NOMBRE_CACHE).then(function (cache) {
+            cache.put(evento.request, copia);
+          });
+        }
+        return respuesta;
+      })
+      .catch(function () {
+        return caches.match(evento.request);
+      })
   );
 });
