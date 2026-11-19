@@ -19,6 +19,13 @@ const modulos = [
     icono: "🗄️",
     disponible: true,
     lecciones: []
+  },
+  {
+    id: "detective",
+    nombre: "Detective de errores",
+    icono: "🕵️",
+    disponible: true,
+    lecciones: []
   }
 ];
 
