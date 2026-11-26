@@ -1,4 +1,4 @@
-const NOMBRE_CACHE = "aprende-v16";
+const NOMBRE_CACHE = "aprende-v17";
 
 const ARCHIVOS = [
   "./",
@@ -34,6 +34,9 @@ const ARCHIVOS = [
   "./det-1.js",
   "./det-2.js",
   "./det-3.js",
+  "./tal-1.js",
+  "./tal-2.js",
+  "./tal-3.js",
   "./app.js",
   "./manifest.json",
   "./icon-192.png",

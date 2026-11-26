@@ -4,6 +4,7 @@ let ejerciciosActuales = [];
 let clavesActuales = [];
 let modoRepaso = false;
 let actual = 0;
+let intentos = 0;
 let elegidos = [];
 let orden = [];
 
@@ -218,6 +219,7 @@ function dibujarTabla(ej) {
 function mostrarEjercicio() {
   const ej = ejerciciosActuales[actual];
   elegidos = [];
+  intentos = 0;
 
   let prefijo = "Reto ";
   if (modoRepaso) {
@@ -231,6 +233,10 @@ function mostrarEjercicio() {
   el("feedback").className = "";
   el("btn-comprobar").hidden = true;
   el("btn-siguiente").hidden = true;
+  el("btn-ver").hidden = true;
+  el("entrada").hidden = true;
+  el("entrada").value = "";
+  el("entrada").disabled = false;
   el("opciones").innerHTML = "";
   el("respuesta").innerHTML = "";
 
@@ -248,6 +254,11 @@ function mostrarEjercicio() {
     el("codigo").textContent = "";
     el("respuesta").hidden = false;
     prepararOrdenar(ej);
+  } else if (ej.tipo === "escribir") {
+    el("codigo").textContent = (ej.codigo || []).join("\n");
+    el("respuesta").hidden = true;
+    el("entrada").hidden = false;
+    el("btn-comprobar").hidden = false;
   } else {
     el("codigo").textContent = ej.codigo.join("\n");
     el("respuesta").hidden = true;
@@ -336,10 +347,90 @@ function quitarBloque(i, ej) {
   dibujarBloques(ej);
 }
 
+function normalizarTexto(texto, ej) {
+  let t = texto
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/\t/g, "    ");
+
+  if (ej.unirLineas) {
+    t = t.replace(/\s*\n\s*/g, " ");
+  }
+
+  const lineas = t.split("\n").map(function (linea) {
+    const sangrada = ej.sangria === true && /^\s+\S/.test(linea);
+    let l = linea.trim().replace(/\s+/g, " ");
+    l = l.replace(/\s*([=+\-*\/<>(),:;{}\[\].!])\s*/g, "$1");
+    if (ej.comillasIguales) {
+      l = l.replace(/'/g, '"');
+    }
+    if (ej.ignorarMayusculas) {
+      l = l.toLowerCase();
+    }
+    if (l === "") {
+      return "";
+    }
+    if (sangrada) {
+      return ">" + l;
+    }
+    return l;
+  }).filter(function (l) {
+    return l !== "";
+  });
+
+  let resultado = lineas.join("\n");
+  if (ej.puntoYComaOpcional) {
+    resultado = resultado.replace(/;$/, "");
+  }
+  return resultado;
+}
+
+function comprobarEscrito(ej, clave) {
+  const caja = el("feedback");
+  const texto = el("entrada").value;
+
+  if (texto.trim() === "") {
+    caja.className = "mal";
+    caja.textContent = "✍️ Escribe tu respuesta primero.";
+    return;
+  }
+
+  const tuya = normalizarTexto(texto, ej);
+  const acierto = ej.respuestas.some(function (respuesta) {
+    return normalizarTexto(respuesta, ej) === tuya;
+  });
+
+  if (acierto) {
+    caja.className = "bien";
+    caja.textContent = "✅ " + ej.feedbackBien;
+    el("entrada").disabled = true;
+    el("btn-comprobar").hidden = true;
+    el("btn-ver").hidden = true;
+    el("btn-siguiente").hidden = false;
+    if (modoRepaso) {
+      quitarFallo(clave);
+    }
+  } else {
+    intentos = intentos + 1;
+    anotarFallo(clave);
+    caja.className = "mal";
+    caja.textContent = "❌ Todavía no. " + ej.pista;
+    if (intentos >= 2) {
+      el("btn-ver").hidden = false;
+    }
+  }
+}
+
 el("btn-comprobar").addEventListener("click", function () {
   const ej = ejerciciosActuales[actual];
   const clave = clavesActuales[actual];
   const caja = el("feedback");
+
+  if (ej.tipo === "escribir") {
+    comprobarEscrito(ej, clave);
+    return;
+  }
+
   let primerError = -1;
 
   for (let pos = 0; pos < elegidos.length; pos++) {
@@ -362,6 +453,20 @@ el("btn-comprobar").addEventListener("click", function () {
     caja.textContent = "❌ El bloque del lugar " + (primerError + 1) + " no va ahí. " + ej.pista;
     anotarFallo(clave);
   }
+});
+
+el("btn-ver").addEventListener("click", function () {
+  const ej = ejerciciosActuales[actual];
+  const clave = clavesActuales[actual];
+  const caja = el("feedback");
+
+  anotarFallo(clave);
+  caja.className = "mal";
+  caja.textContent = "💡 Una respuesta correcta es:\n" + ej.respuestas[0] + "\n\n" + ej.feedbackBien;
+  el("entrada").disabled = true;
+  el("btn-comprobar").hidden = true;
+  el("btn-ver").hidden = true;
+  el("btn-siguiente").hidden = false;
 });
 
 el("btn-siguiente").addEventListener("click", function () {

@@ -26,6 +26,13 @@ const modulos = [
     icono: "🕵️",
     disponible: true,
     lecciones: []
+  },
+  {
+    id: "taller",
+    nombre: "Taller de escritura",
+    icono: "✍️",
+    disponible: true,
+    lecciones: []
   }
 ];
 
